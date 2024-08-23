@@ -3,27 +3,36 @@
 - [R for Data Science](#r-for-data-science)
   - [R Language Basics](#r-language-basics)
     - [Basic Grammar](#basic-grammar)
-    - [pipes](#pipes)
-    - [Apply family](#apply-family)
-    - [debugging tools](#debugging-tools)
-    - [statistical functions](#statistical-functions)
-    - [Scoping Rules in R!](#scoping-rules-in-r)
-    - [R Data Types](#r-data-types)
+      - [operators](#operators)
+        - [pipe operator](#pipe-operator)
+      - [control structures](#control-structures)
+    - [Common Data Structures in R](#common-data-structures-in-r)
       - [Date and Times](#date-and-times)
+    - [R functions](#r-functions)
+    - [Apply family](#apply-family)
+    - [statistical functions](#statistical-functions)
+    - [debugging tools](#debugging-tools)
+    - [Scoping Rules in R](#scoping-rules-in-r)
+      - [Lexical Scoping (Static Scoping)](#lexical-scoping-static-scoping)
+      - [Dynamic Scoping](#dynamic-scoping)
     - [Files I/O](#files-io)
   - [Packages](#packages)
     - [Tidyverse](#tidyverse)
     - [MLR](#mlr)
   - [Data Cleaning in R](#data-cleaning-in-r)
   - [Learning Resources](#learning-resources)
+    - [Download and Set-up](#download-and-set-up)
+    - [R-Studio](#r-studio)
+    - [Learning Resources](#learning-resources-1)
 
 ## R Language Basics
 
 ### Basic Grammar
 
-[operators](https://r-coder.com/operators-r/#Assignment_operators_in_R)
+#### [operators](https://r-coder.com/operators-r/#Assignment_operators_in_R)
 
 - Arithmetic
+  - \+ \- \* / ...
   - %% mod
   - %/% integer division
   - ^ exponential
@@ -34,7 +43,7 @@
     - In many scripting programming languages you can just use the equal sign (=) to assign a variable. For R, the best practice is to use the arrow assignment (<-). Technically, the single arrow assignment can be used in the left or right direction. But the rightward assignment is not generally used in R code.
     - equal to "="
   - <<-
-    -  double arrow assignment, known as a scoping assignment. But the scoping assignment is for advanced R users
+    - double arrow assignment, known as a scoping assignment. But the scoping assignment is for advanced R users
  - ->, ->>
 - logical operators
   - AND (sometimes represented as & or && in R)
@@ -43,7 +52,19 @@
     - | for element-wise OR
   - NOT (!)
 
-control structures:
+##### pipe operator
+
+- pipe operator %>% is used to pass the result of one expression as the input to the next expression. 
+- This operator is provided by the magrittr package and is widely used in the dplyr package for data manipulation.
+
+```r
+result <- data %>%
+  filter(x > 2) %>%      # Filter rows where x is greater than 2
+  mutate(z = x + y) %>%  # Create a new column z which is the sum of x and y
+  select(x, z)           # Select only the x and z columns
+```
+
+#### control structures
 
 - if-else
   - if{} else {}
@@ -53,36 +74,7 @@ control structures:
 - break
 - next
 
-### pipes
-
-%>% operator is the pipe operator in R
-
-### Apply family
-
-- lapply: Loop over a list and evaluate a function on each element 
-- sapply: Same as lapply but try to simplify the result· apply: Apply a function over the margins of an array· tapply: Apply a function over subsets of a vector
-- mapply: Multivariate version of lapply
-
-### debugging tools
-
-- traceback: prints out the function call stack after an error occurs; does nothing if there’s no error
-- debug: flags a function for “debug” mode which allows you to step through execution of a function one line at a time
-- browser: suspends the execution of a function wherever it is called and puts the function in debug mode
-- trace: allows you to insert debugging code into a function a specific places 
-- recover: allows you to modify the error behavior so that you can browse the function call stack
-- System.time and Rprof()
-
-### statistical functions
-
-Functions for probability distributions in R· rnorm: generate random Normal variates with a given mean and standard deviation
-
-- dnorm: evaluate the Normal probability density (with a given mean/SD) at a point (or vector of points)
-- pnorm: evaluate the cumulative distribution function for a Normal distribution · rpois: generate random Poisson variates with a given rate
-- d for density· r for random number generation · p for cumulative distribution· q for quantile function
-
-### Scoping Rules in R!
-
-### R Data Types
+### Common Data Structures in R 
 
 atomic classes:
 
@@ -154,6 +146,82 @@ ymd(20210120)
 as_date(now())
 ```
 
+### R functions
+
+### Apply family
+
+- lapply: Loop over a list and evaluate a function on each element
+- sapply: Same as lapply but try to simplify the result· apply: Apply a function over the margins of an array· tapply: Apply a function over subsets of a vector
+- mapply: Multivariate version of lapply
+
+### statistical functions
+
+Functions for probability distributions in R· rnorm: generate random Normal variates with a given mean and standard deviation
+
+- dnorm: evaluate the Normal probability density (with a given mean/SD) at a point (or vector of points)
+- pnorm: evaluate the cumulative distribution function for a Normal distribution · rpois: generate random Poisson variates with a given rate
+- d for density· r for random number generation · p for cumulative distribution· q for quantile function
+
+### debugging tools
+
+- traceback: prints out the function call stack after an error occurs; does nothing if there’s no error
+- debug: flags a function for “debug” mode which allows you to step through execution of a function one line at a time
+- browser: suspends the execution of a function wherever it is called and puts the function in debug mode
+- trace: allows you to insert debugging code into a function a specific places 
+- recover: allows you to modify the error behavior so that you can browse the function call stack
+- System.time and Rprof()
+
+### Scoping Rules in R
+
+#### Lexical Scoping (Static Scoping)
+
+- Default in R 
+- Function Environment:
+  - When a function is defined, it creates an environment capturing the variables in the scope where the function was defined.
+- Variable Lookup Order:
+  - Local Environment (within the function itself)
+  - Enclosing Environment (where the function was defined)
+  - Global Environment (global workspace)
+  - Base Package (base R environment)
+  - Empty Environment (signals the end of the search)
+
+```r
+   make_counter <- function() {
+     count <- 0
+     function() {
+       count <<- count + 1
+       count
+     }
+   }
+
+   counter <- make_counter()
+   counter()  # Returns 1
+   counter()  # Returns 2
+
+```
+
+#### Dynamic Scoping
+
+- Not the Default:
+  - Dynamic scoping is not the default in R but can be mimicked using constructs like eval and parent.frame
+  - default in other languages such as Python
+- Variable Lookup:
+  - Looks for variable values in the calling functions' environments, moving up the call stack.
+
+```r
+f <- function() {
+    x <- 10
+    g()
+}
+
+g <- function() {
+    print(eval(quote(x), parent.frame()))
+}
+
+x <- 20
+f()  # Prints 10
+```
+
 ### Files I/O
 
 read
@@ -219,6 +287,22 @@ file manipulation
 
 ### Tidyverse
 
+
+- **What is Tidyverse?**
+  - A collection of R packages designed for data science.
+  - Provides tools for data manipulation, exploration, and visualization.
+  - Emphasizes a consistent and coherent approach to data analysis.
+- **Core Packages in Tidyverse:**
+  - **ggplot2**: For data visualization.
+  - **dplyr**: For data manipulation.
+  - **tidyr**: For data tidying.
+  - **readr**: For reading rectangular data (like CSV files).
+  - **purrr**: For functional programming.
+  - **tibble**: For modern data frames.
+  - **stringr**: For string manipulation.
+  - **forcats**: For working with categorical data (factors).
+
+
 > [The tidyverse cookbook](https://rstudio-education.github.io/tidyverse-cookbook/how-to-use-this-book.html)
 
 tidy data, a data structure in which
@@ -272,10 +356,45 @@ tidy data, a data structure in which
 
 ## Learning Resources
 
+### Download and Set-up
+
+- download R at [CRAN](https://cran.r-project.org/mirrors.html)
+- cloud access to [R studio](https://posit.cloud/content/8376590)
+- Download [R Studio Desktop](https://posit.co/download/rstudio-desktop/)
+
+Download packages
+
+Packages can be found in repositories, which are collections of useful packages that are ready to install. You can find repositories on Bioconductor, R-Forge, rOpenSci, or GitHub, but the most commonly used repository is the Comprehensive R Archive Network or [CRAN](https://cran.r-project.org/)
+
+
+```r
+install.packages("tidyverse")
+install.packages("mlr", dependencies = TRUE)
+# for file referencing
+install.packages("here")
+# for data cleaning
+install.packages("skimr")
+install.packages("janitor")
+# calculate bias
+install.packages("SimDesign")
+```
+
+More: quicklist of [useful R-pacakges](https://support.posit.co/hc/en-us/articles/201057987-Quick-list-of-useful-R-packages)
+
+### R-Studio
+
+[R studio keyboard Shortcuts ](file:///Applications/RStudio.app/Contents/Resources/app/www/docs/keyboard.htm)
+
+![](2024-06-26-18-56-29.png)
+
+
+### Learning Resources 
+
 Books
 
 - [R for Data Science](https://r4ds.had.co.nz/index.html) (R4DS)
 - [The tidyverse cookbook](https://rstudio-education.github.io/tidyverse-cookbook/how-to-use-this-book.html)
+- [RyouWithME](https://rladiessydney.org/courses/ryouwithme/)
 
 
 websties
@@ -300,14 +419,18 @@ communities
 
 must-have packages
 
-```r
-install.packages("tidyverse")
-install.packages("mlr", dependencies = TRUE)
-# for file referencing
-install.packages("here")
-# for data cleaning
-install.packages("skimr")
-install.packages("janitor")
-# calculate bias
-install.packages("SimDesign")
-```
+
+
+R vs Python Comparison 
+
+
+| Feature            | R                                                                                  | Python                                                                                          |
+|--------------------|-------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| Common Features    | - Open-source                                                                       | - Open-source                                                                                   |
+|                    | - Data stored in data frames                                                        | - Data stored in data frames                                                                    |
+|                    | - Formulas and functions readily available                                          | - Formulas and functions readily available                                                      |
+|                    | - Community for code development and support                                        | - Community for code development and support                                                    |
+| Unique Advantages  | - Data manipulation, data visualization, and statistics packages                    | - Easy syntax for machine learning needs                                                        |
+|                    | - "Scalpel" approach to data: find packages to do what you want with the data       | - Integrates with cloud platforms like Google Cloud, Amazon Web Services, and Azure             |
+| Unique Challenges  | - Inconsistent naming conventions make it harder for beginners to select functions  | - Many more decisions for beginners to make about data input/output, structure, variables, etc. |
+|                    | - Methods for handling variables may be a little complex for beginners to understand| - "Swiss army knife" approach to data: figure out a way to do what you want with the data       |
